@@ -1,14 +1,18 @@
-import 'dotenv/config';
-import express from 'express';
+import "dotenv/config";
+import express from "express";
 import {
   InteractionType,
   InteractionResponseType,
   InteractionResponseFlags,
   MessageComponentTypes,
   ButtonStyleTypes,
-} from 'discord-interactions';
-import { VerifyDiscordRequest, getRandomEmoji, DiscordRequest } from './utils.js';
-import { getShuffledOptions, getResult } from './game.js';
+} from "discord-interactions";
+import {
+  VerifyDiscordRequest,
+  getRandomEmoji,
+  DiscordRequest,
+} from "./utils.js";
+import { getShuffledOptions, getResult } from "./game.js";
 
 // Create an express app
 const app = express();
@@ -20,10 +24,24 @@ app.use(express.json({ verify: VerifyDiscordRequest(process.env.PUBLIC_KEY) }));
 // Store for in-progress games. In production, you'd want to use a DB
 const activeGames = {};
 
+const conchSentences = [
+  "Maybe someday",
+  "Nothing",
+  "Neither",
+  "I don't think so",
+  "No",
+  "Yes",
+  "Try asking again.",
+  "You cannot get to the top by sitting on your bottom",
+  "I see a new sauce in your future",
+  "Ask next time",
+  "Follow the seahorse",
+];
+
 /**
  * Interactions endpoint URL where Discord will send HTTP requests
  */
-app.post('/interactions', async function (req, res) {
+app.post("/interactions", async function (req, res) {
   // Interaction type and data
   const { type, id, data } = req.body;
 
@@ -42,13 +60,23 @@ app.post('/interactions', async function (req, res) {
     const { name } = data;
 
     // "test" command
-    if (name === 'test') {
+    if (name === "test") {
       // Send a message into the channel where command was triggered from
       return res.send({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
           // Fetches a random emoji to send from a helper function
-          content: 'hello world ' + getRandomEmoji(),
+          content: "hello world " + getRandomEmoji(),
+        },
+      });
+    }
+
+    if (name == "conch") {
+      return res.send({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          conctent:
+            conchSentences[Math.floor(Math.random() * conchSentences.length)],
         },
       });
     }
@@ -56,5 +84,5 @@ app.post('/interactions', async function (req, res) {
 });
 
 app.listen(PORT, () => {
-  console.log('Listening on port', PORT);
+  console.log("Listening on port", PORT);
 });
